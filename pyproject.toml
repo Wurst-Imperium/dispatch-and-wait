@@ -1,0 +1,10 @@
+[project]
+name = "dispatch-and-wait"
+version = "1.0.0"
+description = "Dispatch a workflow and wait for it to complete"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic==2.11.9",
+    "requests==2.32.5",
+]

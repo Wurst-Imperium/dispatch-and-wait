@@ -1,0 +1,31 @@
+name: Dummy Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      sleep:
+        type: string
+        required: true
+      fail:
+        type: string
+        required: true
+      distinct_id:
+        type: string
+        required: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Echo distinct ID ${{ inputs.distinct_id }}
+      run: echo ${{ inputs.distinct_id }}
+
+    - name: Sleep ${{ inputs.sleep }} seconds
+      run: sleep ${{ inputs.sleep }}
+
+    - name: Fail
+      if: ${{ inputs.fail == 'true' }}
+      run: |
+        echo "Failing"
+        exit 1

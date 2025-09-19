@@ -1,0 +1,50 @@
+name: Run Tests
+
+on:
+  push:
+    tags-ignore:
+    - "**"
+  # Can't run on pull_request because the token won't have actions:write permission
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - expected_to_fail: false
+          args: |
+            {
+              "sleep": 10,
+              "fail": false
+            }
+        - expected_to_fail: true
+          args: |
+            {
+              "sleep": 10,
+              "fail": true
+            }
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Dispatch dummy workflow
+      id: dispatch_dummy_workflow
+      continue-on-error: ${{ matrix.expected_to_fail }}
+      uses: ./
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        owner: ${{ github.repository_owner }}
+        repo: ${{ github.event.repository.name }}
+        ref: ${{ github.ref_name }}
+        workflow: dummy.yml
+        workflow_inputs: ${{ matrix.args }}
+
+    - name: Assert dummy workflow failed
+      if: ${{ matrix.expected_to_fail && steps.dispatch_dummy_workflow.outcome != 'failure' }}
+      run: exit 1

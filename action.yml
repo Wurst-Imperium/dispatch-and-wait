@@ -1,0 +1,66 @@
+name: Dispatch and Wait
+description: Dispatch a workflow and wait for it to complete
+
+inputs:
+  token:
+    description: GitHub PAT (must have actions:write permission)
+    required: true
+  owner:
+    description: GitHub repository owner
+    required: true
+  repo:
+    description: GitHub repository name
+    required: true
+  ref:
+    description: Git reference (branch or tag)
+    required: true
+  workflow:
+    description: Workflow file name or ID
+    required: true
+  workflow_inputs:
+    description: JSON object of workflow inputs
+    default: "{}"
+  run_timeout_seconds:
+    description: Time limit for the workflow run (will fail if the run takes longer)
+    default: 300
+  start_timeout_seconds:
+    description: Time limit for the workflow to start
+    default: 300
+  poll_interval_ms:
+    description: How often to poll the run status
+    default: 5000
+
+outputs:
+  run_id:
+    description: Dispatched workflow run ID
+    value: ${{ steps.run.outputs.run_id }}
+  run_url:
+    description: Dispatched workflow run URL
+    value: ${{ steps.run.outputs.run_url }}
+
+runs:
+  using: composite
+  steps:
+
+  - name: Set up uv
+    uses: astral-sh/setup-uv@v6
+    with:
+      enable-cache: true
+      working-directory: ${{ github.action_path }}
+
+  - name: Run main.py
+    id: run
+    env:
+      GITHUB_TOKEN: ${{ inputs.token }}
+    shell: bash
+    run: |
+      uv run --locked --project '${{ github.action_path }}' \
+        '${{ github.action_path }}/main.py' \
+        '${{ inputs.owner }}' \
+        '${{ inputs.repo }}' \
+        '${{ inputs.ref }}' \
+        '${{ inputs.workflow }}' \
+        '${{ inputs.workflow_inputs }}' \
+        '${{ inputs.run_timeout_seconds }}' \
+        '${{ inputs.start_timeout_seconds }}' \
+        '${{ inputs.poll_interval_ms }}'
