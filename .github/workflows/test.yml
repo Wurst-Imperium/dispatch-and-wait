@@ -2,6 +2,8 @@ name: Run Tests
 
 on:
   push:
+    branches:
+      - "**"
     tags-ignore:
     - "**"
   # Can't run on pull_request because the token won't have actions:write permission
