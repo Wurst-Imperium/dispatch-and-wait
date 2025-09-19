@@ -21,14 +21,14 @@ jobs:
         - expected_to_fail: false
           args: |
             {
-              "sleep": 10,
-              "fail": false
+              "sleep": "10",
+              "fail": "false"
             }
         - expected_to_fail: true
           args: |
             {
-              "sleep": 10,
-              "fail": true
+              "sleep": "10",
+              "fail": "true"
             }
     steps:
 
