@@ -18,18 +18,42 @@ jobs:
     strategy:
       matrix:
         include:
+        # Normal case
         - expected_to_fail: false
-          args: |
+          ref: ${{ github.ref_name }}
+          inputs: |
             {
               "sleep": "10",
               "fail": "false"
             }
+          run_timeout_seconds: 300
+        # ref instead of ref_name
+        - expected_to_fail: false
+          ref: ${{ github.ref }}
+          inputs: |
+            {
+              "sleep": "10",
+              "fail": "false"
+            }
+          run_timeout_seconds: 300
+        # Failed workflow
         - expected_to_fail: true
-          args: |
+          ref: ${{ github.ref_name }}
+          inputs: |
             {
               "sleep": "10",
               "fail": "true"
             }
+          run_timeout_seconds: 300
+        # Run succeeds but takes too long
+        - expected_to_fail: true
+          ref: ${{ github.ref_name }}
+          inputs: |
+            {
+              "sleep": "20",
+              "fail": "false"
+            }
+          run_timeout_seconds: 10
     steps:
 
     - name: Checkout repository
@@ -43,9 +67,10 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         owner: ${{ github.repository_owner }}
         repo: ${{ github.event.repository.name }}
-        ref: ${{ github.ref_name }}
+        ref: ${{ matrix.ref }}
         workflow: dummy.yml
-        workflow_inputs: ${{ matrix.args }}
+        workflow_inputs: ${{ matrix.inputs }}
+        run_timeout_seconds: ${{ matrix.run_timeout_seconds }}
 
     - name: Assert dummy workflow failed
       if: ${{ matrix.expected_to_fail && steps.dispatch_dummy_workflow.outcome != 'failure' }}
