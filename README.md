@@ -16,9 +16,9 @@ steps:
   id: dispatch_and_wait
   with:
     token: ${{ secrets.YOUR_CUSTOM_GITHUB_TOKEN }}  # Must have actions:write permission
+    owner: your-username-or-org
+    repo: your-repo-name
     ref: target_branch
-    repo: repository-name
-    owner: repository-owner
     workflow: workflow-to-dispatch.yml
     workflow_inputs: |  # Optional
       {
