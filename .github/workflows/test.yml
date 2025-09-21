@@ -18,8 +18,8 @@ jobs:
     strategy:
       matrix:
         include:
-        # Normal case
-        - expected_to_fail: false
+        - name: Normal case
+          expected_to_fail: false
           ref: ${{ github.ref_name }}
           inputs: |
             {
@@ -27,8 +27,8 @@ jobs:
               "fail": "false"
             }
           run_timeout_seconds: 300
-        # ref instead of ref_name
-        - expected_to_fail: false
+        - name: ref instead of ref_name
+          expected_to_fail: false
           ref: ${{ github.ref }}
           inputs: |
             {
@@ -36,8 +36,8 @@ jobs:
               "fail": "false"
             }
           run_timeout_seconds: 300
-        # Failed workflow
-        - expected_to_fail: true
+        - name: Failed workflow
+          expected_to_fail: true
           ref: ${{ github.ref_name }}
           inputs: |
             {
@@ -45,8 +45,8 @@ jobs:
               "fail": "true"
             }
           run_timeout_seconds: 300
-        # Run succeeds but takes too long
-        - expected_to_fail: true
+        - name: Run succeeds but takes too long
+          expected_to_fail: true
           ref: ${{ github.ref_name }}
           inputs: |
             {
@@ -54,6 +54,7 @@ jobs:
               "fail": "false"
             }
           run_timeout_seconds: 10
+    name: ${{ matrix.name }}
     steps:
 
     - name: Checkout repository
