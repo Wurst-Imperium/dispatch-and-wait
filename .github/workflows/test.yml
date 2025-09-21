@@ -65,7 +65,7 @@ jobs:
       continue-on-error: ${{ matrix.expected_to_fail }}
       uses: ./
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ github.token }}
         owner: ${{ github.repository_owner }}
         repo: ${{ github.event.repository.name }}
         ref: ${{ matrix.ref }}

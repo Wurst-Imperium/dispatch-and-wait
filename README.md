@@ -73,7 +73,7 @@ To be able to dispatch a workflow, you need to use a token that has the `actions
       steps:
       - uses: Wurst-Imperium/dispatch-and-wait@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           # ... other parameters ...
   ```
 - If you are dispatching a workflow in a different repository, you will need to [create a personal access token](https://github.com/settings/personal-access-tokens) with the `actions:write` permission and appropriate repository access, [create a secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) holding the token, and use it like this:
