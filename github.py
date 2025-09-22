@@ -1,7 +1,6 @@
 import json
 import os
 import requests
-import traceback
 import util
 from pydantic import BaseModel
 from typing import Literal
@@ -93,7 +92,7 @@ def dispatch_workflow(owner: str, repo: str, workflow: str, ref: str, inputs: di
 			f"  Status: {_get_status_code(e)}\n"
 			f"  Response: {_get_response_text(e)}"
 		)
-		traceback.print_exc()
+		util.gh_traceback()
 		return False
 
 
@@ -118,7 +117,7 @@ def list_workflow_runs(
 			f"  Status: {_get_status_code(e)}\n"
 			f"  Response: {_get_response_text(e)}"
 		)
-		traceback.print_exc()
+		util.gh_traceback()
 		return []
 
 
@@ -136,7 +135,7 @@ def get_workflow_run(owner: str, repo: str, run_id: int) -> WorkflowRun | None:
 			f"  Status: {_get_status_code(e)}\n"
 			f"  Response: {_get_response_text(e)}"
 		)
-		traceback.print_exc()
+		util.gh_traceback()
 		return None
 
 
@@ -154,7 +153,7 @@ def list_workflow_run_jobs(owner: str, repo: str, run_id: int) -> list[WorkflowR
 			f"  Status: {_get_status_code(e)}\n"
 			f"  Response: {_get_response_text(e)}"
 		)
-		traceback.print_exc()
+		util.gh_traceback()
 		return []
 
 

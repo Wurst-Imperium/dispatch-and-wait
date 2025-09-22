@@ -1,4 +1,5 @@
 import os
+import traceback
 
 
 def gh_output(key: str, value: str) -> None:
@@ -11,6 +12,12 @@ def gh_output(key: str, value: str) -> None:
 
 def gh_error(message: str) -> None:
 	print(f"::error::{message}", flush=True)
+
+
+def gh_traceback() -> None:
+	print("::group::Traceback")
+	print(traceback.format_exc())
+	print("::endgroup::", flush=True)
 
 
 def log(message: str) -> None:

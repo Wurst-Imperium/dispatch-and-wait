@@ -2,7 +2,6 @@ import github
 import json
 import os
 import time
-import traceback
 import util
 import uuid
 from argparse import ArgumentParser
@@ -175,5 +174,5 @@ if __name__ == "__main__":
 		)
 	except Exception as e:
 		util.gh_error(f"{e}")
-		traceback.print_exc()
+		util.gh_traceback()
 		raise e
