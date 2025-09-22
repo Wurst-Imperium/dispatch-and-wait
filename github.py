@@ -75,7 +75,7 @@ def dispatch_workflow(owner: str, repo: str, workflow: str, ref: str, inputs: di
 		payload = {"ref": ref, "inputs": inputs}
 		response = requests.post(url, headers=headers, json=payload, timeout=30)
 		response.raise_for_status()
-		util.gh_notice(
+		util.log(
 			f"Successfully dispatched workflow:\n"
 			f"  Ref: {owner}/{repo}@{ref}\n"
 			f"  File: {workflow}\n"

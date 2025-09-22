@@ -32,7 +32,7 @@ def find_workflow_run(
 			for job in jobs:
 				for step in job.steps:
 					if distinct_id in step.name:
-						util.gh_notice(
+						util.log(
 							f"Successfully identified the workflow run:\n"
 							f"  ID: {run.id}\n"
 							f"  URL: {run.html_url}"
@@ -65,7 +65,7 @@ def wait_for_workflow_run(
 
 def on_run_finished(owner: str, repo: str, run: github.WorkflowRun) -> None:
 	if run.is_successful():
-		util.gh_notice(
+		util.log(
 			"Workflow run finished successfully:\n"
 			f"  ID: {run.id}\n"
 			f"  URL: {run.html_url}\n"

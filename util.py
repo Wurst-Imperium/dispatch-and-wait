@@ -13,9 +13,5 @@ def gh_error(message: str) -> None:
 	print(f"::error::{message}", flush=True)
 
 
-def gh_notice(message: str) -> None:
-	print(f"::notice::{message}", flush=True)
-
-
 def log(message: str) -> None:
 	print(message, flush=True)
