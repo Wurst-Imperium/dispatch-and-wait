@@ -1,6 +1,7 @@
 import github
 import json
 import os
+import sys
 import time
 import util
 import uuid
@@ -175,4 +176,4 @@ if __name__ == "__main__":
 	except Exception as e:
 		util.gh_error(f"{e}")
 		util.gh_traceback()
-		raise e
+		sys.exit(1)
