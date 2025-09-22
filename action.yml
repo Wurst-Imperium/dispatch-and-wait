@@ -29,6 +29,9 @@ inputs:
   poll_interval_ms:
     description: How often to poll the run status
     default: 5000
+  do_summary:
+    description: Whether to display a link to the dispatched run in the step summary
+    default: true
 
 outputs:
   run_id:
@@ -63,4 +66,5 @@ runs:
         '${{ inputs.workflow_inputs }}' \
         '${{ inputs.run_timeout_seconds }}' \
         '${{ inputs.start_timeout_seconds }}' \
-        '${{ inputs.poll_interval_ms }}'
+        '${{ inputs.poll_interval_ms }}' \
+        '${{ inputs.do_summary }}'

@@ -27,6 +27,7 @@ steps:
     run_timeout_seconds: 600 # Default: 300
     start_timeout_seconds: 120 # Default: 300
     poll_interval_ms: 3000 # Default: 5000
+    do_summary: false # Default: true
 
 - name: Use the output run ID and URL
   run: |

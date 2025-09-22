@@ -110,6 +110,7 @@ def main(
 	run_timeout_seconds: int,
 	start_timeout_seconds: int,
 	poll_interval: float,
+	do_summary: bool,
 ) -> None:
 	start_time = time.time()
 	distinct_id = str(uuid.uuid4())
@@ -124,6 +125,12 @@ def main(
 	)
 	util.gh_output("run_id", run.id)
 	util.gh_output("run_url", run.html_url)
+	if do_summary:
+		util.gh_summary(
+			f"Dispatched run: [{run.id}]({run.html_url})\n"
+			f"Workflow: [{workflow}](https://github.com/{owner}/{repo}/blob/{ref}/.github/workflows/{workflow}) in {owner}/{repo}@{ref}\n"
+			f"Inputs:\n```\n{json.dumps(workflow_inputs, indent=2)}\n```"
+		)
 	if run.is_finished():
 		on_run_finished(owner, repo, run)
 		return
@@ -159,6 +166,7 @@ if __name__ == "__main__":
 			if int(x) > 0
 			else parser.error("poll_interval_ms must be positive"),
 		)
+		parser.add_argument("do_summary", type=bool, default=True)
 		args = parser.parse_args()
 		if os.getenv("GITHUB_TOKEN") is None:
 			parser.error("token is missing")
@@ -172,6 +180,7 @@ if __name__ == "__main__":
 			args.run_timeout_seconds,
 			args.start_timeout_seconds,
 			args.poll_interval_ms / 1000.0,
+			args.do_summary,
 		)
 	except Exception as e:
 		util.gh_error(f"{e}")
