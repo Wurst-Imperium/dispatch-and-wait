@@ -8,10 +8,11 @@ from datetime import datetime, timezone
 
 
 def gh_output(key: str, value: str) -> None:
-	print(f"{key}={value}")
 	if "GITHUB_OUTPUT" in os.environ:
 		with open(os.environ["GITHUB_OUTPUT"], "a") as f:
 			f.write(f"{key}={value}\n")
+	else:
+		print(f"{key}={value}")
 
 
 def find_workflow_run(
