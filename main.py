@@ -46,13 +46,14 @@ def find_workflow_run(
 			if jobs and run.is_finished():
 				already_checked_runs.add(run.id)
 		time.sleep(max(0.001, min(poll_interval, deadline - time.time())))
-	raise Exception(
-		"Timed out trying to find the workflow run\n"
+	print(
+		"::error::Timed out trying to find the workflow run\n"
 		"Make sure the workflow sets distinct_id as a step name, e.g.:\n"
 		r"    - name: Echo distinct ID ${{ inputs.distinct_id }}\n"
 		r"      run: echo ${{ inputs.distinct_id }}\n"
 		"Place this step as early in the workflow as possible."
 	)
+	raise Exception("Timed out trying to find the workflow run")
 
 
 def wait_for_workflow_run(
@@ -65,27 +66,30 @@ def wait_for_workflow_run(
 		if run is not None and run.is_finished():
 			on_run_finished(owner, repo, run)
 			return
+	print("::error::Timed out waiting for workflow run")
 	raise Exception("Timed out waiting for workflow run")
 
 
 def on_run_finished(owner: str, repo: str, run: github.WorkflowRun) -> None:
 	if run.is_successful():
 		print(
-			"Workflow run finished successfully:\n"
+			"::notice::Workflow run finished successfully:\n"
 			f"  ID: {run.id}\n"
 			f"  URL: {run.html_url}\n"
 			f"  Status: {run.status}\n"
 			f"  Conclusion: {run.conclusion}"
 		)
 	else:
-		raise Exception(
-			"Workflow run failed:\n"
+		failed_steps = _get_failed_steps(owner, repo, run.id)
+		print(
+			"::error::Workflow run failed:\n"
 			f"  ID: {run.id}\n"
 			f"  URL: {run.html_url}\n"
 			f"  Status: {run.status}\n"
 			f"  Conclusion: {run.conclusion}\n"
-			f"  Failed steps:{_get_failed_steps(owner, repo, run.id)}"
+			f"  Failed steps:{failed_steps}"
 		)
+		raise Exception("Workflow run failed")
 
 
 def _get_failed_steps(owner: str, repo: str, run_id: int) -> str:
@@ -119,10 +123,11 @@ def main(
 	distinct_id = str(uuid.uuid4())
 	adjusted_inputs = {"distinct_id": distinct_id, **workflow_inputs}
 	if not github.dispatch_workflow(owner, repo, workflow, ref, adjusted_inputs):
-		raise Exception(
-			"Failed to dispatch workflow\n"
+		print(
+			"::error::Failed to dispatch workflow\n"
 			f"Make sure your token has actions:write permission for {owner}/{repo}"
 		)
+		raise Exception("Failed to dispatch workflow")
 	run = find_workflow_run(
 		owner, repo, workflow, start_time, distinct_id, poll_interval, start_timeout_seconds
 	)

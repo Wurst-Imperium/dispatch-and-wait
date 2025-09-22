@@ -75,7 +75,7 @@ def dispatch_workflow(owner: str, repo: str, workflow: str, ref: str, inputs: di
 		response = requests.post(url, headers=headers, json=payload, timeout=30)
 		response.raise_for_status()
 		print(
-			f"Successfully dispatched workflow:\n"
+			f"::notice::Successfully dispatched workflow:\n"
 			f"  Ref: {owner}/{repo}@{ref}\n"
 			f"  File: {workflow}\n"
 			f"  Inputs: {json.dumps(inputs)}\n"
@@ -86,7 +86,7 @@ def dispatch_workflow(owner: str, repo: str, workflow: str, ref: str, inputs: di
 	except Exception as e:
 		traceback.print_exc()
 		print(
-			f"Failed to dispatch workflow:\n"
+			f"::error::Failed to dispatch workflow:\n"
 			f"  Ref: {owner}/{repo}@{ref}\n"
 			f"  File: {workflow}\n"
 			f"  Inputs: {json.dumps(inputs)}\n"
@@ -111,7 +111,7 @@ def list_workflow_runs(
 	except Exception as e:
 		traceback.print_exc()
 		print(
-			f"Failed to list workflow runs:\n"
+			f"::error::Failed to list workflow runs:\n"
 			f"  Repo: {owner}/{repo}\n"
 			f"  Workflow: {workflow}\n"
 			f"  Start Time: {start_time_iso}\n"
@@ -130,7 +130,7 @@ def get_workflow_run(owner: str, repo: str, run_id: int) -> WorkflowRun | None:
 	except Exception as e:
 		traceback.print_exc()
 		print(
-			f"Failed to get workflow run:\n"
+			f"::error::Failed to get workflow run:\n"
 			f"  Repo: {owner}/{repo}\n"
 			f"  Run ID: {run_id}\n"
 			f"  Status: {_get_status_code(e)}\n"
@@ -148,7 +148,7 @@ def list_workflow_run_jobs(owner: str, repo: str, run_id: int) -> list[WorkflowR
 	except Exception as e:
 		traceback.print_exc()
 		print(
-			f"Failed to list workflow run jobs:\n"
+			f"::error::Failed to list workflow run jobs:\n"
 			f"  Repo: {owner}/{repo}\n"
 			f"  Run ID: {run_id}\n"
 			f"  Status: {_get_status_code(e)}\n"
