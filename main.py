@@ -63,8 +63,10 @@ def wait_for_workflow_run(
 	raise Exception("Timed out waiting for workflow run")
 
 
-def on_run_finished(owner: str, repo: str, run: github.WorkflowRun) -> None:
+def on_run_finished(owner: str, repo: str, run: github.WorkflowRun, do_summary: bool) -> None:
 	if run.is_successful():
+		if do_summary:
+			util.gh_summary("✅ Run finished successfully")
 		util.log(
 			"Workflow run finished successfully:\n"
 			f"  ID: {run.id}\n"
@@ -74,6 +76,8 @@ def on_run_finished(owner: str, repo: str, run: github.WorkflowRun) -> None:
 		)
 	else:
 		failed_steps = _get_failed_steps(owner, repo, run.id)
+		if do_summary:
+			util.gh_summary(f"❌ Run failed\nFailed steps:{failed_steps}")
 		raise Exception(
 			"Workflow run failed:\n"
 			f"  ID: {run.id}\n"
@@ -95,9 +99,7 @@ def _get_failed_steps(owner: str, repo: str, run_id: int) -> str:
 		for step in job.steps:
 			if not step.is_failed():
 				continue
-			result += f"\n    {step.name}"
-			result += f"\n      Status: {step.status}"
-			result += f"\n      Conclusion: {step.conclusion}"
+			result += f"\n- {step.name} (status: {step.status}, conclusion: {step.conclusion})"
 	return result
 
 
@@ -128,11 +130,12 @@ def main(
 	if do_summary:
 		util.gh_summary(
 			f"Dispatched run: [{run.id}]({run.html_url})\n"
-			f"Workflow: [{workflow}](https://github.com/{owner}/{repo}/blob/{ref}/.github/workflows/{workflow}) in {owner}/{repo}@{ref}\n"
+			f"Repository: {owner}/{repo}@{ref}\n"
+			f"Workflow: [{workflow}](https://github.com/{owner}/{repo}/blob/{ref}/.github/workflows/{workflow})\n"
 			f"Inputs:\n```\n{json.dumps(workflow_inputs, indent=2)}\n```"
 		)
 	if run.is_finished():
-		on_run_finished(owner, repo, run)
+		on_run_finished(owner, repo, run, do_summary)
 		return
 	wait_for_workflow_run(owner, repo, run.id, poll_interval, run_timeout_seconds)
 
