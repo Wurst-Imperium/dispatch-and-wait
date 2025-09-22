@@ -13,7 +13,7 @@ def gh_output(key: str, value: str) -> None:
 def gh_summary(message: str) -> None:
 	if "GITHUB_STEP_SUMMARY" in os.environ:
 		with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
-			f.write(message)
+			f.write(message + "\n")
 	else:
 		print(message, flush=True)
 
