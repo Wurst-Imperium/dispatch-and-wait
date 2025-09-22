@@ -65,6 +65,8 @@ def wait_for_workflow_run(
 		if run is not None and run.is_finished():
 			on_run_finished(owner, repo, run, do_summary)
 			return
+	if do_summary:
+		util.gh_summary("❌ Run timed out")
 	raise Exception("Timed out waiting for workflow run")
 
 
