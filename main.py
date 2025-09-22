@@ -51,14 +51,19 @@ def find_workflow_run(
 
 
 def wait_for_workflow_run(
-	owner: str, repo: str, run_id: int, poll_interval: float, run_timeout_seconds: int
+	owner: str,
+	repo: str,
+	run_id: int,
+	poll_interval: float,
+	run_timeout_seconds: int,
+	do_summary: bool,
 ) -> None:
 	deadline = time.time() + run_timeout_seconds
 	while time.time() < deadline:
 		time.sleep(max(0.001, min(poll_interval, deadline - time.time())))
 		run = github.get_workflow_run(owner, repo, run_id)
 		if run is not None and run.is_finished():
-			on_run_finished(owner, repo, run)
+			on_run_finished(owner, repo, run, do_summary)
 			return
 	raise Exception("Timed out waiting for workflow run")
 
@@ -137,7 +142,7 @@ def main(
 	if run.is_finished():
 		on_run_finished(owner, repo, run, do_summary)
 		return
-	wait_for_workflow_run(owner, repo, run.id, poll_interval, run_timeout_seconds)
+	wait_for_workflow_run(owner, repo, run.id, poll_interval, run_timeout_seconds, do_summary)
 
 
 if __name__ == "__main__":
