@@ -2,17 +2,11 @@ import github
 import json
 import os
 import time
+import traceback
+import util
 import uuid
 from argparse import ArgumentParser
 from datetime import datetime, timezone
-
-
-def gh_output(key: str, value: str) -> None:
-	if "GITHUB_OUTPUT" in os.environ:
-		with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-			f.write(f"{key}={value}\n")
-	else:
-		print(f"{key}={value}")
 
 
 def find_workflow_run(
@@ -24,22 +18,22 @@ def find_workflow_run(
 	poll_interval: float,
 	start_timeout_seconds: int,
 ) -> github.WorkflowRun:
-	print(f"Searching for workflow run with distinct ID {distinct_id}...")
+	util.log(f"Searching for workflow run with distinct ID {distinct_id}...")
 	start_time_iso = datetime.fromtimestamp(start_time, tz=timezone.utc).isoformat()
 	deadline = start_time + start_timeout_seconds
 	already_checked_runs = set()
 	while time.time() < deadline:
-		print(f"Listing workflow runs after {start_time_iso}...")
+		util.log(f"Listing workflow runs after {start_time_iso}...")
 		runs = github.list_workflow_runs(owner, repo, workflow, start_time_iso)
 		runs = [run for run in runs if run.id not in already_checked_runs]
 		for run in runs:
-			print(f"Checking run {run.id}...")
+			util.log(f"Checking run {run.id}...")
 			jobs = github.list_workflow_run_jobs(owner, repo, run.id)
 			for job in jobs:
 				for step in job.steps:
 					if distinct_id in step.name:
-						print(
-							f"::notice::Successfully identified the workflow run:\n"
+						util.gh_notice(
+							f"Successfully identified the workflow run:\n"
 							f"  ID: {run.id}\n"
 							f"  URL: {run.html_url}"
 						)
@@ -47,8 +41,8 @@ def find_workflow_run(
 			if jobs and run.is_finished():
 				already_checked_runs.add(run.id)
 		time.sleep(max(0.001, min(poll_interval, deadline - time.time())))
-	print(
-		"::error::Timed out trying to find the workflow run\n"
+	util.gh_error(
+		"Timed out trying to find the workflow run\n"
 		"Make sure the workflow sets distinct_id as a step name, e.g.:\n"
 		r"    - name: Echo distinct ID ${{ inputs.distinct_id }}\n"
 		r"      run: echo ${{ inputs.distinct_id }}\n"
@@ -67,14 +61,14 @@ def wait_for_workflow_run(
 		if run is not None and run.is_finished():
 			on_run_finished(owner, repo, run)
 			return
-	print("::error::Timed out waiting for workflow run")
+	util.gh_error("Timed out waiting for workflow run")
 	raise Exception("Timed out waiting for workflow run")
 
 
 def on_run_finished(owner: str, repo: str, run: github.WorkflowRun) -> None:
 	if run.is_successful():
-		print(
-			"::notice::Workflow run finished successfully:\n"
+		util.gh_notice(
+			"Workflow run finished successfully:\n"
 			f"  ID: {run.id}\n"
 			f"  URL: {run.html_url}\n"
 			f"  Status: {run.status}\n"
@@ -82,8 +76,8 @@ def on_run_finished(owner: str, repo: str, run: github.WorkflowRun) -> None:
 		)
 	else:
 		failed_steps = _get_failed_steps(owner, repo, run.id)
-		print(
-			"::error::Workflow run failed:\n"
+		util.gh_error(
+			"Workflow run failed:\n"
 			f"  ID: {run.id}\n"
 			f"  URL: {run.html_url}\n"
 			f"  Status: {run.status}\n"
@@ -124,16 +118,15 @@ def main(
 	distinct_id = str(uuid.uuid4())
 	adjusted_inputs = {"distinct_id": distinct_id, **workflow_inputs}
 	if not github.dispatch_workflow(owner, repo, workflow, ref, adjusted_inputs):
-		print(
-			"::error::Failed to dispatch workflow\n"
+		raise Exception(
+			"Failed to dispatch workflow\n"
 			f"Make sure your token has actions:write permission for {owner}/{repo}"
 		)
-		raise Exception("Failed to dispatch workflow")
 	run = find_workflow_run(
 		owner, repo, workflow, start_time, distinct_id, poll_interval, start_timeout_seconds
 	)
-	gh_output("run_id", run.id)
-	gh_output("run_url", run.html_url)
+	util.gh_output("run_id", run.id)
+	util.gh_output("run_url", run.html_url)
 	if run.is_finished():
 		on_run_finished(owner, repo, run)
 		return
@@ -141,42 +134,49 @@ def main(
 
 
 if __name__ == "__main__":
-	parser = ArgumentParser()
-	parser.add_argument("owner")
-	parser.add_argument("repo")
-	parser.add_argument(
-		"ref",
-		type=lambda x: x.removeprefix("refs/heads/").removeprefix("refs/tags/"),
-	)
-	parser.add_argument("workflow")
-	parser.add_argument("workflow_inputs", type=json.loads)
-	parser.add_argument(
-		"run_timeout_seconds",
-		type=lambda x: int(x)
-		if int(x) > 0
-		else parser.error("run_timeout_seconds must be positive"),
-	)
-	parser.add_argument(
-		"start_timeout_seconds",
-		type=lambda x: int(x)
-		if int(x) > 0
-		else parser.error("start_timeout_seconds must be positive"),
-	)
-	parser.add_argument(
-		"poll_interval_ms",
-		type=lambda x: int(x) if int(x) > 0 else parser.error("poll_interval_ms must be positive"),
-	)
-	args = parser.parse_args()
-	if os.getenv("GITHUB_TOKEN") is None:
-		parser.error("token is missing")
+	try:
+		parser = ArgumentParser()
+		parser.add_argument("owner")
+		parser.add_argument("repo")
+		parser.add_argument(
+			"ref",
+			type=lambda x: x.removeprefix("refs/heads/").removeprefix("refs/tags/"),
+		)
+		parser.add_argument("workflow")
+		parser.add_argument("workflow_inputs", type=json.loads)
+		parser.add_argument(
+			"run_timeout_seconds",
+			type=lambda x: int(x)
+			if int(x) > 0
+			else parser.error("run_timeout_seconds must be positive"),
+		)
+		parser.add_argument(
+			"start_timeout_seconds",
+			type=lambda x: int(x)
+			if int(x) > 0
+			else parser.error("start_timeout_seconds must be positive"),
+		)
+		parser.add_argument(
+			"poll_interval_ms",
+			type=lambda x: int(x)
+			if int(x) > 0
+			else parser.error("poll_interval_ms must be positive"),
+		)
+		args = parser.parse_args()
+		if os.getenv("GITHUB_TOKEN") is None:
+			parser.error("token is missing")
 
-	main(
-		args.owner,
-		args.repo,
-		args.ref,
-		args.workflow,
-		args.workflow_inputs,
-		args.run_timeout_seconds,
-		args.start_timeout_seconds,
-		args.poll_interval_ms / 1000.0,
-	)
+		main(
+			args.owner,
+			args.repo,
+			args.ref,
+			args.workflow,
+			args.workflow_inputs,
+			args.run_timeout_seconds,
+			args.start_timeout_seconds,
+			args.poll_interval_ms / 1000.0,
+		)
+	except Exception as e:
+		util.gh_error(f"{e}")
+		traceback.print_exc()
+		raise e

@@ -2,6 +2,7 @@ import json
 import os
 import requests
 import traceback
+import util
 from pydantic import BaseModel
 from typing import Literal
 
@@ -74,8 +75,8 @@ def dispatch_workflow(owner: str, repo: str, workflow: str, ref: str, inputs: di
 		payload = {"ref": ref, "inputs": inputs}
 		response = requests.post(url, headers=headers, json=payload, timeout=30)
 		response.raise_for_status()
-		print(
-			f"::notice::Successfully dispatched workflow:\n"
+		util.gh_notice(
+			f"Successfully dispatched workflow:\n"
 			f"  Ref: {owner}/{repo}@{ref}\n"
 			f"  File: {workflow}\n"
 			f"  Inputs: {json.dumps(inputs)}\n"
@@ -84,15 +85,15 @@ def dispatch_workflow(owner: str, repo: str, workflow: str, ref: str, inputs: di
 		)
 		return True
 	except Exception as e:
-		traceback.print_exc()
-		print(
-			f"::error::Failed to dispatch workflow:\n"
+		util.gh_error(
+			f"Failed to dispatch workflow:\n"
 			f"  Ref: {owner}/{repo}@{ref}\n"
 			f"  File: {workflow}\n"
 			f"  Inputs: {json.dumps(inputs)}\n"
 			f"  Status: {_get_status_code(e)}\n"
 			f"  Response: {_get_response_text(e)}"
 		)
+		traceback.print_exc()
 		return False
 
 
@@ -109,15 +110,15 @@ def list_workflow_runs(
 		response.raise_for_status()
 		return [WorkflowRun.model_validate(run) for run in response.json().get("workflow_runs", [])]
 	except Exception as e:
-		traceback.print_exc()
-		print(
-			f"::error::Failed to list workflow runs:\n"
+		util.gh_error(
+			f"Failed to list workflow runs:\n"
 			f"  Repo: {owner}/{repo}\n"
 			f"  Workflow: {workflow}\n"
 			f"  Start Time: {start_time_iso}\n"
 			f"  Status: {_get_status_code(e)}\n"
 			f"  Response: {_get_response_text(e)}"
 		)
+		traceback.print_exc()
 		return []
 
 
@@ -128,14 +129,14 @@ def get_workflow_run(owner: str, repo: str, run_id: int) -> WorkflowRun | None:
 		response.raise_for_status()
 		return WorkflowRun.model_validate(response.json())
 	except Exception as e:
-		traceback.print_exc()
-		print(
-			f"::error::Failed to get workflow run:\n"
+		util.gh_error(
+			f"Failed to get workflow run:\n"
 			f"  Repo: {owner}/{repo}\n"
 			f"  Run ID: {run_id}\n"
 			f"  Status: {_get_status_code(e)}\n"
 			f"  Response: {_get_response_text(e)}"
 		)
+		traceback.print_exc()
 		return None
 
 
@@ -146,14 +147,14 @@ def list_workflow_run_jobs(owner: str, repo: str, run_id: int) -> list[WorkflowR
 		response.raise_for_status()
 		return [WorkflowRunJob.model_validate(job) for job in response.json().get("jobs", [])]
 	except Exception as e:
-		traceback.print_exc()
-		print(
-			f"::error::Failed to list workflow run jobs:\n"
+		util.gh_error(
+			f"Failed to list workflow run jobs:\n"
 			f"  Repo: {owner}/{repo}\n"
 			f"  Run ID: {run_id}\n"
 			f"  Status: {_get_status_code(e)}\n"
 			f"  Response: {_get_response_text(e)}"
 		)
+		traceback.print_exc()
 		return []
 
 
