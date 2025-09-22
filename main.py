@@ -129,7 +129,6 @@ def main(context: DispatchContext) -> None:
 		)
 	if not run.is_finished():
 		run = context.wait_for_run(run.id)
-		return
 	context.on_run_finished(run)
 
 
