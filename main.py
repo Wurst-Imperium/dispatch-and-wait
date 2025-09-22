@@ -39,7 +39,7 @@ def find_workflow_run(
 				for step in job.steps:
 					if distinct_id in step.name:
 						print(
-							f"Successfully identified the workflow run:\n"
+							f"::notice::Successfully identified the workflow run:\n"
 							f"  ID: {run.id}\n"
 							f"  URL: {run.html_url}"
 						)
