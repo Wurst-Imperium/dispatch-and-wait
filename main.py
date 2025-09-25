@@ -36,7 +36,9 @@ class DispatchContext(BaseModel):
 		while time.time() < deadline:
 			attempt += 1
 			if attempt % 10 == 0:
-				util.log("Finding the workflow run is taking longer than expected. Logging additional info...")
+				util.log(
+					"Finding the workflow run is taking longer than expected. Logging additional info..."
+				)
 			util.log(f"Listing workflow runs after {start_time_iso}...")
 			runs = github.list_workflow_runs(self.owner, self.repo, self.workflow, start_time_iso)
 			runs = [run for run in runs if run.id not in already_checked_runs]
@@ -44,7 +46,9 @@ class DispatchContext(BaseModel):
 				util.log(f"Checking run {run.id}...")
 				jobs = github.list_workflow_run_jobs(self.owner, self.repo, run.id)
 				if attempt % 10 == 0:
-					util.log(f"Got the following response for run {run.id}:\n{json.dumps(jobs, indent=2)}")
+					util.log(
+						f"Got the following job list for run {run.id}:\n{json.dumps([job.model_dump() for job in jobs], indent=2)}"
+					)
 				for job in jobs:
 					for step in job.steps:
 						if distinct_id in step.name:
