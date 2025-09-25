@@ -60,8 +60,8 @@ class DispatchContext(BaseModel):
 		raise Exception(
 			"Timed out trying to find the workflow run\n"
 			"Make sure the workflow sets distinct_id as a step name, e.g.:\n"
-			"    - name: Echo distinct ID $\{\{ inputs.distinct_id \}\}\n"
-			"      run: echo $\{\{ inputs.distinct_id \}\}\n"
+			"    - name: Echo distinct ID ${{ inputs.distinct_id }}\n"
+			"      run: echo ${{ inputs.distinct_id }}\n"
 			"Place this step as early in the workflow as possible."
 		)
 
