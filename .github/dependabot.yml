@@ -15,9 +15,11 @@ updates:
 - package-ecosystem: "pip"
   directory: "/"
   multi-ecosystem-group: python
+  patterns: ["*"]
 - package-ecosystem: "uv"
   directory: "/"
   multi-ecosystem-group: python
+  patterns: ["*"]
 - package-ecosystem: "github-actions"
   # Directory should be `/` instead of `/.github/workflows` according to the docs.
   directory: "/"
