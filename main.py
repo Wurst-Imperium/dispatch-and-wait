@@ -133,7 +133,7 @@ def main(context: DispatchContext) -> None:
 	if context.do_summary:
 		util.gh_summary(
 			f"Dispatched run: [{run.id}]({run.html_url})\n"
-			f"Repository: {context.owner}/{context.repo}@{context.ref}\n"
+			f"Repository: `{context.owner}/{context.repo}@{context.ref}`\n"
 			f"Workflow: [{context.workflow}](https://github.com/{context.owner}/{context.repo}/blob/{context.ref}/.github/workflows/{context.workflow})\n"
 			f"Inputs:\n```\n{json.dumps(context.workflow_inputs, indent=2)}\n```"
 		)
