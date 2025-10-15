@@ -2,14 +2,22 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
+
+multi-ecosystem-groups:
+  python:
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+
 updates:
 - package-ecosystem: "pip"
   directory: "/"
-  schedule:
-    interval: "weekly"
-    day: "monday"
-    time: "06:00"
-    timezone: "Europe/Berlin"
+  multi-ecosystem-group: python
+- package-ecosystem: "uv"
+  directory: "/"
+  multi-ecosystem-group: python
 - package-ecosystem: "github-actions"
   # Directory should be `/` instead of `/.github/workflows` according to the docs.
   directory: "/"
