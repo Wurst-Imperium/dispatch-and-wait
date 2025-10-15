@@ -5,6 +5,6 @@ description = "Dispatch a workflow and wait for it to complete"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pydantic==2.11.9",
+    "pydantic==2.12.2",
     "requests==2.32.5",
 ]
