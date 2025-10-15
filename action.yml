@@ -50,6 +50,7 @@ runs:
     with:
       enable-cache: true
       working-directory: ${{ github.action_path }}
+      ignore-empty-workdir: true  # setup-uv's empty workdir check doesn't consider the working-directory input, see https://github.com/astral-sh/setup-uv/issues/642
 
   - name: Run main.py
     id: run
