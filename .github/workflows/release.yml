@@ -44,6 +44,7 @@ jobs:
           exit 1
         fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "major=$(echo "$VERSION" | cut -d'.' -f1)" >> $GITHUB_OUTPUT
 
     - name: Create and push tag
       run: |
@@ -53,8 +54,9 @@ jobs:
         git tag $TAG_NAME
         git push origin $TAG_NAME
 
-    - name: Update v1 branch
+    - name: Update major version branch
       run: |
-        git checkout v1
+        BRANCH_NAME=v${{ steps.get_version.outputs.major }}
+        git checkout -B $BRANCH_NAME
         git merge master
-        git push origin v1
+        git push origin $BRANCH_NAME
