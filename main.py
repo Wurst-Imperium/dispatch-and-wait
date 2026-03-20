@@ -6,7 +6,7 @@ import time
 import util
 import uuid
 from argparse import ArgumentParser
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel
 
 
@@ -29,7 +29,8 @@ class DispatchContext(BaseModel):
 
 	def find_run(self, start_time: float, distinct_id: str) -> github.WorkflowRun:
 		util.log(f"Searching for workflow run with distinct ID {distinct_id}...")
-		start_time_iso = datetime.fromtimestamp(start_time, tz=timezone.utc).isoformat()
+		search_start = datetime.fromtimestamp(start_time, tz=timezone.utc) - timedelta(seconds=1)
+		start_time_iso = search_start.isoformat()
 		deadline = start_time + self.start_timeout_seconds
 		already_checked_runs = set()
 		attempt = 0
