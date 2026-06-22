@@ -58,7 +58,7 @@ jobs:
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Dispatch dummy workflow
       id: dispatch_dummy_workflow
